@@ -166,5 +166,70 @@ example (h₀ : a ≤ b) (h₁ : c < d) : a + Real.exp c + e < b + Real.exp d + 
   apply le_refl
 
 example (h₀ : d ≤ e) : c + Real.exp (a + d) ≤ c + Real.exp (a + e) := by
-  sorry
+  apply add_le_add_right
+  rw [Real.exp_le_exp]
+  apply add_le_add_right
+  exact h₀ 
 
+example : (0 : ℝ) < 1 := by norm_num
+
+example (h : a ≤ b) : Real.log (1 + Real.exp a) ≤ Real.log (1 + Real.exp b) := by
+  have h₀ : 0 < 1 + Real.exp a := by
+    apply add_pos
+    · norm_num
+    apply Real.exp_pos
+  apply Real.log_le_log h₀
+  apply add_le_add_right
+  rw [Real.exp_le_exp]
+  exact h
+
+example : 0 ≤ a ^ 2 := by
+  /- apply? -/
+  exact sq_nonneg a
+
+example (h : a ≤ b) : c - Real.exp b ≤ c - Real.exp a := by
+  apply add_le_add_right
+  apply neg_le_neg
+  rw [Real.exp_le_exp]
+  exact h
+
+example (a b : ℝ) : 2*a*b ≤ a^2 + b^2 := by
+  have h : 0 ≤ a^2 - 2*a*b + b^2
+  calc
+    a^2 - 2*a*b + b^2 = (a - b)^2 := by ring
+    _ ≥ 0 := by apply pow_two_nonneg
+  linarith
+
+-- ~ Claude
+example (a b : ℝ) : |a*b| ≤ (a^2 + b^2)/2 := by
+  apply abs_le'.mpr 
+  constructor
+  · have h : (a - b)^2 ≥ 0 := sq_nonneg _
+    have h' : (a - b)^2 = a^2 - 2*(a*b) + b^2 := by ring
+    linarith
+  · have h : (a + b)^2 ≥ 0 := sq_nonneg _
+    have h' : (a + b)^2 = a^2 + 2*(a*b) + b^2 := by ring
+    linarith
+      
+#check abs_le'.mpr
+
+example (a b : ℝ) : min a b = min b a := by
+  apply le_antisymm
+  · show min a b ≤ min b a
+    apply le_min
+    · apply min_le_right
+    apply min_le_left
+  · show min b a ≤ min a b
+    apply le_min
+    · apply min_le_right
+    apply min_le_left
+
+example (a b : ℝ) : min a b = min b a := by
+  have h : ∀ x y : ℝ, min x y ≤ min y x := by
+    intro x y
+    apply le_min
+    · apply min_le_right
+    apply min_le_left
+  apply le_antisymm 
+  · apply h
+  apply h
